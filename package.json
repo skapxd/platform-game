@@ -21,6 +21,7 @@
     "vite": "^4.4.5"
   },
   "dependencies": {
-    "game-inputs": "^0.8.0"
+    "game-inputs": "^0.8.0",
+    "touchsweep": "^2.1.0"
   }
 }

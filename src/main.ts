@@ -3,20 +3,20 @@ import platformPath from '#/src/img/platform.png'
 import platformSmallTallPath from '#/src/img/platformSmallTall.png'
 import hillsPath from '#/src/img/hills.png'
 import backgroundPath from '#/src/img/background.png'
-import { GameInputs } from 'game-inputs'
 import { loadImage } from './utils/load-image'
+import TouchSweep from 'touchsweep'
 
 async function main () {
   const canvas = document.querySelector('canvas')
   if (canvas == null) throw new Error('Canvas not found')
-  const inputs = new GameInputs(canvas, {
-    preventDefaults: true,
-    allowContextMenu: false
-  })
-  inputs.bind('move-left', 'KeyA', 'ArrowLeft')
-  inputs.bind('move-right', 'KeyD', 'ArrowRight')
-  inputs.bind('fire', 'Mouse1', 'Space')
-  inputs.bind('alt-fire', 'Mouse3')
+
+  new TouchSweep(
+    canvas,
+    {
+      value: 1
+    },
+    20
+  )
 
   canvas.width = document.body.clientWidth
   canvas.height = document.body.clientHeight
@@ -24,17 +24,6 @@ async function main () {
 
   const c = canvas.getContext('2d')
   if (c == null) throw new Error('Canvas context not found')
-  // bind an arbitrary event name to one or more physical key codes
-  inputs.bind('move-left', 'KeyA', 'ArrowLeft')
-  inputs.bind('move-right', 'KeyD', 'ArrowRight')
-  inputs.bind('move-up', 'KeyW', 'ArrowUp')
-  inputs.bind('move-down', 'KeyS', 'ArrowDown')
-  inputs.bind('fire', 'Mouse1', 'Space')
-  inputs.bind('alt-fire', 'Mouse3')
-  // inputs.bind('move-left', 'KeyA', 'ArrowLeft')
-  // inputs.bind('move-right', 'KeyD', 'ArrowRight')
-  // inputs.bind('fire', 'Mouse1', 'Space')
-  // inputs.bind('alt-fire', 'Mouse3')
 
   class Player {
     constructor (
@@ -197,14 +186,39 @@ async function main () {
     scrollOffset = 0
   }
 
+  const cleanSwipe = () => {
+    keys.left.pressed = false
+    keys.up.pressed = false
+    keys.right.pressed = false
+  }
+
+  canvas.addEventListener('swipeleft', cleanSwipe)
+  // canvas.removeEventListener('swipeleft', cleanSwipe)
+
+  canvas.addEventListener('swiperight', cleanSwipe)
+  // canvas.removeEventListener('swiperight', cleanSwipe)
+
+  canvas.addEventListener('swipeup', cleanSwipe)
+  // canvas.removeEventListener('swipeup', cleanSwipe)
+
+  canvas.addEventListener('swipemove', event => {
+    // Swipe direction: none
+    // Swipe event: swipemove
+    // @ts-expect-error: ERR
+    const coords = event.detail.coords
+
+    if (coords.moveX < coords.startX) keys.left.pressed = true
+    else keys.left.pressed = false
+
+    if (coords.moveX > coords.startX) keys.right.pressed = true
+    else keys.right.pressed = false
+
+    if (coords.moveY < coords.startY - 20) keys.up.pressed = true
+    else keys.up.pressed = false
+  })
+
   function animate () {
     if (canvas == null) throw new Error('Canvas context not found')
-
-    console.log(inputs.state, inputs.pointerState)
-    keys.right.pressed = inputs.state['move-right'] || inputs.pointerState.dx > 0
-    keys.left.pressed = inputs.state['move-left'] || inputs.pointerState.dx < 0
-    keys.up.pressed = inputs.state['move-up'] || inputs.pointerState.dy < -10
-    inputs.tick()
 
     requestAnimationFrame(animate)
     c?.clearRect(0, 0, canvas.width, canvas.height)
