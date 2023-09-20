@@ -51,6 +51,7 @@ async function main () {
 
     jump () {
       this.velocity.y = -15
+      keys.up.jump++
     }
 
     moveToLeft () {
@@ -156,7 +157,7 @@ async function main () {
     },
     up: {
       pressed: false,
-      canJump: false
+      jump: 0
     }
   }
   let scrollOffset = 0
@@ -213,11 +214,14 @@ async function main () {
       // Permitir caer al jugador a la derecha de la plataforma
       const condition4 = player.position.x <= platform.position.x + platform.width
       // Sistema de colisiones para plataformas
-      if (condition1 && condition2 && condition3 && condition4) player.velocity.y = 0
+      if (condition1 && condition2 && condition3 && condition4) {
+        player.velocity.y = 0
+        keys.up.jump = 0
+      }
     })
 
-    console.log({ y: player.velocity.y, jump: keys.up.canJump })
-    if (keys.up.pressed) player.jump()
+    console.log({ jump: keys.up.jump, pressed: keys.up.pressed })
+    if (keys.up.pressed && keys.up.jump === 0 && player.velocity.y === 0) player.jump()
 
     // win condition
     if (scrollOffset > 2_000) alert('Ganaste')
