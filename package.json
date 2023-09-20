@@ -19,5 +19,8 @@
     "eslint-plugin-promise": "^6.0.0",
     "typescript": "*",
     "vite": "^4.4.5"
+  },
+  "dependencies": {
+    "game-inputs": "^0.8.0"
   }
 }

@@ -1,14 +1,22 @@
+import '#/normalize.css'
 import platformPath from '#/src/img/platform.png'
 import platformSmallTallPath from '#/src/img/platformSmallTall.png'
 import hillsPath from '#/src/img/hills.png'
 import backgroundPath from '#/src/img/background.png'
-
+import { GameInputs } from 'game-inputs'
 import { loadImage } from './utils/load-image'
 
 async function main () {
   const canvas = document.querySelector('canvas')
-
   if (canvas == null) throw new Error('Canvas not found')
+  const inputs = new GameInputs(canvas, {
+    preventDefaults: true,
+    allowContextMenu: false
+  })
+  inputs.bind('move-left', 'KeyA', 'ArrowLeft')
+  inputs.bind('move-right', 'KeyD', 'ArrowRight')
+  inputs.bind('fire', 'Mouse1', 'Space')
+  inputs.bind('alt-fire', 'Mouse3')
 
   canvas.width = document.body.clientWidth
   canvas.height = document.body.clientHeight
@@ -16,6 +24,17 @@ async function main () {
 
   const c = canvas.getContext('2d')
   if (c == null) throw new Error('Canvas context not found')
+  // bind an arbitrary event name to one or more physical key codes
+  inputs.bind('move-left', 'KeyA', 'ArrowLeft')
+  inputs.bind('move-right', 'KeyD', 'ArrowRight')
+  inputs.bind('move-up', 'KeyW', 'ArrowUp')
+  inputs.bind('move-down', 'KeyS', 'ArrowDown')
+  inputs.bind('fire', 'Mouse1', 'Space')
+  inputs.bind('alt-fire', 'Mouse3')
+  // inputs.bind('move-left', 'KeyA', 'ArrowLeft')
+  // inputs.bind('move-right', 'KeyD', 'ArrowRight')
+  // inputs.bind('fire', 'Mouse1', 'Space')
+  // inputs.bind('alt-fire', 'Mouse3')
 
   class Player {
     constructor (
@@ -181,13 +200,19 @@ async function main () {
   function animate () {
     if (canvas == null) throw new Error('Canvas context not found')
 
+    console.log(inputs.state, inputs.pointerState)
+    keys.right.pressed = inputs.state['move-right'] || inputs.pointerState.dx > 0
+    keys.left.pressed = inputs.state['move-left'] || inputs.pointerState.dx < 0
+    keys.up.pressed = inputs.state['move-up'] || inputs.pointerState.dy < -10
+    inputs.tick()
+
     requestAnimationFrame(animate)
     c?.clearRect(0, 0, canvas.width, canvas.height)
     genericObjects.forEach((genericObject) => { genericObject.draw() })
     platforms.forEach((platform) => { platform.draw() })
     player.update()
 
-    if (keys.right.pressed && player.position.x < 400) player.moveToRight()
+    if (keys.right.pressed && player.position.x < 200) player.moveToRight()
     else if (keys.left.pressed && player.position.x > 100) player.moveToLeft()
     else {
       player.velocity.x = 0
@@ -220,52 +245,15 @@ async function main () {
       }
     })
 
-    console.log({ jump: keys.up.jump, pressed: keys.up.pressed })
     if (keys.up.pressed && keys.up.jump === 0 && player.velocity.y === 0) player.jump()
 
     // win condition
     if (scrollOffset > 2_000) alert('Ganaste')
     // lose condition
-    if (player.position.y > canvas.height) {
-      init()
-    }
+    if (player.position.y > canvas.height) init()
   }
   init()
   animate()
-
-  addEventListener('keydown', ({ key }) => {
-    switch (key) {
-      case 'ArrowUp':{
-        keys.up.pressed = true
-        break
-      }
-      case 'ArrowLeft':{
-        keys.left.pressed = true
-        break
-      }
-      case 'ArrowRight':{
-        keys.right.pressed = true
-        break
-      }
-    }
-  })
-
-  addEventListener('keyup', ({ key }) => {
-    switch (key) {
-      case 'ArrowUp':{
-        keys.up.pressed = false
-        break
-      }
-      case 'ArrowLeft':{
-        keys.left.pressed = false
-        break
-      }
-      case 'ArrowRight':{
-        keys.right.pressed = false
-        break
-      }
-    }
-  })
 }
 
 main()
