@@ -10,6 +10,7 @@ import { Player } from './player'
 import { keys } from './keys'
 import { controls } from './controls'
 import { drawDebugTools } from './utils/rules'
+import { GenericObject } from './generic-objects'
 
 async function main () {
   const canvas = document.querySelector('canvas')
@@ -29,22 +30,31 @@ async function main () {
   ])
 
   let platforms: Platform[]
+  let genericObjects: GenericObject[]
   const player = new Player()
   let scrollOffset: number
 
   const init = () => {
     player.init()
     scrollOffset = 0
+    keys.left.pressed = false
+    keys.right.pressed = false
     platforms = [
       // new Platform({ image: platformSmallTallImg, position: { x: platformSmallTallImg.width * 1.5, y: canvas.height - platformSmallTallImg.height - 10 } })
-      new Platform({ /* image: platformImg, */ position: { x: 100, y: 150 } })
+      new Platform({ /* image: platformImg, */ position: { x: 0, y: 50 } }),
+      new Platform({ /* image: platformImg, */ position: { x: 50, y: 300 } }),
+      new Platform({ /* image: platformImg, */ position: { x: 80, y: 600 } }),
+      new Platform({ /* image: platformImg, */ position: { x: 20, y: 900 } }),
+      new Platform({ /* image: platformImg, */ position: { x: 0, y: 1200 } }),
+      new Platform({ /* image: platformImg, */ position: { x: 50, y: 1400 } })
+
       // new Platform({ image: platformImg, position: { x: platformImg.width - 3, y: canvas.height - platformImg.height + 20 } }),
       // new Platform({ image: platformImg, position: { x: platformImg.width * 2.5, y: canvas.height - platformImg.height + 20 } })
     ]
-    // genericObjects = [
-    //   new GenericObject({ image: backgroundImg, position: { x: 0, y: 0 } }),
-    //   new GenericObject({ image: hillsImg, position: { x: -1, y: canvas.height - hillsImg.height + 10 } })
-    // ]
+    genericObjects = [
+      new GenericObject({ color: 'rgba(255,0,0,0.5)', position: { x: 0, y: 0 }, width: canvas.height / 2, height: canvas.width / 2 }),
+      new GenericObject({ color: 'rgba(0,255,0,0.5)', position: { x: 0, y: canvas.width + 50 }, width: canvas.height / 2, height: canvas.width / 2 })
+    ]
   }
 
   function animate () {
@@ -53,36 +63,31 @@ async function main () {
 
     requestAnimationFrame(animate)
     c.clearRect(0, 0, canvas.width, canvas.height)
-    platforms.forEach((platform) => { platform.drawBlock(c) })
+    genericObjects.forEach((genericObject) => { genericObject.drawBlock(c) })
+
     left.draw(c)
     right.draw(c)
-    player.update(c)
 
     drawDebugTools(c, canvas)
 
+    platforms.forEach((platform) => { platform.drawBlock(c) })
     platforms.forEach(platform => {
       // Verificar que el jugador este por encima de la plataforma
       const condition1 = player.position.x >= platform.position.x + platform.height
       // Permitir saltar cuando se esta por encima de la plataforma
       const condition2 = player.position.x + player.velocity.x <= platform.position.x + platform.height
       // Permitir caer al jugador a la izquierda de la plataforma
-      const condition3 = true ?? player.position.x + player.width >= platform.position.x
+      const condition3 = player.position.y + player.width >= platform.position.y
       // Permitir caer al jugador a la derecha de la plataforma
-      const condition4 = true ?? player.position.x <= platform.position.x + platform.width
+      const condition4 = player.position.y <= platform.position.y + platform.width
       // Sistema de colisiones para plataformas
-      // console.log({ condition1, condition2, condition3, condition4 })
-      // console.log('condition1: ', player.position.x, platform.position.x + platform.height)
-      console.log('condition2: ', player.position.x, platform.position.x + platform.height)
       if (condition1 && condition2 && condition3 && condition4) {
-        console.log('colision')
-        // player.stop()
         player.velocity.x = 0
-
-        // keys.up.jump = 0
+        keys.up.jump = 0
       }
     })
 
-    if (keys.up.pressed && keys.up.jump < 10) player.jump()
+    if (keys.up.pressed && keys.up.jump < 1) player.jump()
     else if (keys.right.pressed && player.position.y <= canvas.height / 2) player.moveRight()
     else if (keys.left.pressed && player.position.y >= canvas.height / 8) player.moveLeft()
     else {
@@ -90,23 +95,28 @@ async function main () {
       if (keys.right.pressed) {
         scrollOffset += 5
         platforms.forEach(platform => { platform.moveToLeft() })
-        // genericObjects.forEach(genericObject => { genericObject.moveToLeft() })
+        genericObjects.forEach(genericObject => { genericObject.moveToLeft() })
       } else if (keys.left.pressed && scrollOffset > 0) {
         scrollOffset -= 5
         platforms.forEach(platform => { platform.moveToRight() })
-        // genericObjects.forEach(genericObject => { genericObject.moveToRight() })
+        genericObjects.forEach(genericObject => { genericObject.moveToRight() })
       } else if (keys.left.pressed && scrollOffset === 0 && player.position.y > 0) {
         player.moveLeft()
       }
     }
+    player.update(c)
 
     // win condition
     if (scrollOffset > 2_000) {
-      alert('Ganaste')
       init()
+      alert('Ganaste')
     }
     // lose condition
-    if (player.position.x < 0) init()
+    console.log(player.position.x)
+    if (player.position.x <= 0) {
+      init()
+      alert('Perdiste')
+    }
   }
 
   init()

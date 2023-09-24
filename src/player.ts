@@ -1,3 +1,5 @@
+import { keys } from './keys'
+
 const gravity = 0.5
 
 export class Player {
@@ -20,17 +22,17 @@ export class Player {
     this.position.x += this.velocity.x
     this.position.y += this.velocity.y
 
-    if (this.position.x - this.width + this.velocity.x >= 0) {
+    if (this.position.x + this.velocity.x >= 0) {
       this.velocity.x -= gravity
-    } else this.position.x = 0
+    }
   }
 
   moveLeft () {
-    this.velocity.y = -5
+    this.velocity.y = -3
   }
 
   moveRight () {
-    this.velocity.y = +5
+    this.velocity.y = +3
   }
 
   stop () {
@@ -38,7 +40,9 @@ export class Player {
   }
 
   jump () {
-    this.velocity.x = 15
+    if (keys.up.jump === 1) return
+    this.velocity.x = 8
+    keys.up.jump++
   }
 
   init () {

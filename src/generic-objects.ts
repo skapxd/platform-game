@@ -1,7 +1,8 @@
-export class Platform {
+export class GenericObject {
   image: HTMLImageElement
   width: number
   height: number
+  color: string
   position: {
     x: number
     y: number
@@ -9,15 +10,19 @@ export class Platform {
 
   constructor ({
     image = new Image(),
+    width = 200,
+    height = 30,
+    color = 'black',
     position = {
       x: -100,
       y: -100
     }
   }
   ) {
+    this.color = color
     this.image = image
-    this.width = /* image.width || */ 200
-    this.height = /* image.height ||  */30
+    this.width = width
+    this.height = height
     this.position = position
   }
 
@@ -32,17 +37,17 @@ export class Platform {
 
   drawBlock (c: CanvasRenderingContext2D) {
     c.save()
-    c.fillStyle = 'green'
+    c.fillStyle = this.color
     c.fillRect(this.position.x, this.position.y, this.height, this.width)
     // c.fillRect(200, this.position.y, this.height, this.width)
     c.restore()
   }
 
   moveToLeft () {
-    this.position.y -= 3
+    this.position.y -= 1
   }
 
   moveToRight () {
-    this.position.y += 3
+    this.position.y += 1
   }
 }

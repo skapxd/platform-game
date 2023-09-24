@@ -11,6 +11,25 @@ interface Controls {
 }
 
 export const controls = ({ canvas, keys, c, player }: Controls) => {
+  canvas.addEventListener('touchstart', (event) => {
+    const rect = canvas.getBoundingClientRect()
+
+    const x = event.changedTouches[0].clientX - rect.left
+    const y = event.changedTouches[0].clientY - rect.top
+
+    // right
+    if (c.isPointInPath(right.area, x, y)) {
+      keys.right.pressed = true
+      keys.left.pressed = false
+    }
+
+    // left
+    if (c.isPointInPath(left.area, x, y)) {
+      keys.left.pressed = true
+      keys.right.pressed = false
+    }
+  })
+
   canvas.addEventListener('touchmove', (event) => {
     const rect = canvas.getBoundingClientRect()
 
