@@ -1,149 +1,24 @@
 import '#/normalize.css'
+import { left, right } from './tutorial/controls'
 import platformPath from '#/src/img/platform.png'
 import platformSmallTallPath from '#/src/img/platformSmallTall.png'
 import hillsPath from '#/src/img/hills.png'
 import backgroundPath from '#/src/img/background.png'
 import { loadImage } from './utils/load-image'
-import TouchSweep from 'touchsweep'
+import { Platform } from './platform'
+import { Player } from './player'
+import { keys } from './keys'
+import { controls } from './controls'
 
 async function main () {
   const canvas = document.querySelector('canvas')
   if (canvas == null) throw new Error('Canvas not found')
 
-  new TouchSweep(
-    canvas,
-    {
-      value: 1
-    },
-    20
-  )
-
   canvas.width = document.body.clientWidth
   canvas.height = document.body.clientHeight
-  const gravity = 0.5
 
   const c = canvas.getContext('2d')
   if (c == null) throw new Error('Canvas context not found')
-
-  class Player {
-    constructor (
-      public position = {
-        x: 100,
-        y: 100
-      },
-      public height = 30,
-      public width = 30,
-      public velocity = {
-        x: 0,
-        y: 1
-      }
-    ) {}
-
-    draw () {
-      if (c == null) throw new Error('Canvas context not found')
-      c.fillStyle = 'red'
-      c.fillRect(this.position.x, this.position.y, this.width, this.height)
-    }
-
-    update () {
-      if (canvas == null) throw new Error('Canvas context not found')
-
-      this.draw()
-      this.position.y += this.velocity.y
-      this.position.x += this.velocity.x
-
-      if (this.position.y + this.height + this.velocity.y <= canvas.height) {
-        this.velocity.y += gravity
-      }
-    }
-
-    jump () {
-      this.velocity.y = -15
-      keys.up.jump++
-    }
-
-    moveToLeft () {
-      this.velocity.x = -5
-    }
-
-    moveToRight () {
-      this.velocity.x = +5
-    }
-  }
-
-  class Platform {
-    image: HTMLImageElement
-    width: number
-    height: number
-    position: {
-      x: number
-      y: number
-    }
-
-    constructor ({
-      image = new Image(),
-      position = {
-        x: 150,
-        y: 600
-      }
-    }
-    ) {
-      this.image = image
-      this.width = image.width
-      this.height = image.height
-      this.position = position
-    }
-
-    draw () {
-      if (c == null) throw new Error('Canvas context not found')
-      c.drawImage(this.image, this.position.x, this.position.y)
-    }
-
-    moveToLeft () {
-      this.position.x -= 5
-    }
-
-    moveToRight () {
-      this.position.x += 5
-    }
-  }
-
-  class GenericObject {
-    image: HTMLImageElement
-    width: number
-    height: number
-    position: {
-      x: number
-      y: number
-    }
-
-    constructor ({
-      image = new Image(),
-      position = {
-        x: 150,
-        y: 600
-      }
-    }
-    ) {
-      this.image = image
-      this.width = image.width
-      this.height = image.height
-      this.position = position
-    }
-
-    draw () {
-      if (c == null) throw new Error('Canvas context not found')
-      c.drawImage(this.image, this.position.x, this.position.y)
-    }
-
-    moveToLeft () {
-      this.position.x -= 1
-    }
-
-    moveToRight () {
-      this.position.x += 1
-    }
-  }
 
   const [platformImg, hillsImg, backgroundImg, platformSmallTallImg] = await Promise.all([
     loadImage(platformPath),
@@ -152,122 +27,81 @@ async function main () {
     loadImage(platformSmallTallPath)
   ])
 
-  let player = new Player({ x: 100, y: canvas.height - platformImg.height - 20 - 3 })
   let platforms: Platform[] = []
-  let genericObjects: GenericObject[] = []
-
-  const keys = {
-    right: {
-      pressed: false
-    },
-    left: {
-      pressed: false
-    },
-    up: {
-      pressed: false,
-      jump: 0
-    }
-  }
+  let player: Player
   let scrollOffset = 0
 
   const init = () => {
-    player = new Player({ x: 100, y: canvas.height - platformImg.height - 20 - 3 })
-    platforms = [
-      new Platform({ image: platformSmallTallImg, position: { x: platformSmallTallImg.width * 1.5, y: canvas.height - platformSmallTallImg.height - 10 } }),
-      new Platform({ image: platformImg, position: { x: 0, y: canvas.height - platformImg.height + 20 } }),
-      new Platform({ image: platformImg, position: { x: platformImg.width - 3, y: canvas.height - platformImg.height + 20 } }),
-      new Platform({ image: platformImg, position: { x: platformImg.width * 2.5, y: canvas.height - platformImg.height + 20 } })
-    ]
-    genericObjects = [
-      new GenericObject({ image: backgroundImg, position: { x: 0, y: 0 } }),
-      new GenericObject({ image: hillsImg, position: { x: -1, y: canvas.height - hillsImg.height + 10 } })
-    ]
-
+    player = new Player({ x: 0, y: 0 })
     scrollOffset = 0
+    platforms = [
+      // new Platform({ image: platformSmallTallImg, position: { x: platformSmallTallImg.width * 1.5, y: canvas.height - platformSmallTallImg.height - 10 } })
+      new Platform({ image: platformImg, position: { x: -100, y: -100 } })
+      // new Platform({ image: platformImg, position: { x: platformImg.width - 3, y: canvas.height - platformImg.height + 20 } }),
+      // new Platform({ image: platformImg, position: { x: platformImg.width * 2.5, y: canvas.height - platformImg.height + 20 } })
+    ]
+    // genericObjects = [
+    //   new GenericObject({ image: backgroundImg, position: { x: 0, y: 0 } }),
+    //   new GenericObject({ image: hillsImg, position: { x: -1, y: canvas.height - hillsImg.height + 10 } })
+    // ]
   }
-
-  const cleanSwipe = () => {
-    keys.left.pressed = false
-    keys.up.pressed = false
-    keys.right.pressed = false
-  }
-
-  canvas.addEventListener('swipeleft', cleanSwipe)
-  // canvas.removeEventListener('swipeleft', cleanSwipe)
-
-  canvas.addEventListener('swiperight', cleanSwipe)
-  // canvas.removeEventListener('swiperight', cleanSwipe)
-
-  canvas.addEventListener('swipeup', cleanSwipe)
-  // canvas.removeEventListener('swipeup', cleanSwipe)
-
-  canvas.addEventListener('swipemove', event => {
-    // Swipe direction: none
-    // Swipe event: swipemove
-    // @ts-expect-error: ERR
-    const coords = event.detail.coords
-
-    if (coords.moveX < coords.startX) keys.left.pressed = true
-    else keys.left.pressed = false
-
-    if (coords.moveX > coords.startX) keys.right.pressed = true
-    else keys.right.pressed = false
-
-    if (coords.moveY < coords.startY - 20) keys.up.pressed = true
-    else keys.up.pressed = false
-  })
 
   function animate () {
     if (canvas == null) throw new Error('Canvas context not found')
+    if (c == null) throw new Error('Canvas context not found')
 
     requestAnimationFrame(animate)
-    c?.clearRect(0, 0, canvas.width, canvas.height)
-    genericObjects.forEach((genericObject) => { genericObject.draw() })
-    platforms.forEach((platform) => { platform.draw() })
-    player.update()
+    c.clearRect(0, 0, canvas.width, canvas.height)
+    platforms.forEach((platform) => { platform.draw(c) })
+    left.draw(c)
+    right.draw(c)
+    player.update(c)
 
-    if (keys.right.pressed && player.position.x < 200) player.moveToRight()
-    else if (keys.left.pressed && player.position.x > 100) player.moveToLeft()
+    // platforms.forEach(platform => {
+    // // Verificar que el jugador este por encima de la plataforma
+    //   const condition1 = player.position.y + player.height <= platform.position.y
+    //   // Permitir saltar cuando se esta por encima de la plataforma
+    //   const condition2 = player.position.y + player.height + player.velocity.y >= platform.position.y
+    //   // Permitir caer al jugador a la izquierda de la plataforma
+    //   const condition3 = player.position.x + player.width >= platform.position.x
+    //   // Permitir caer al jugador a la derecha de la plataforma
+    //   const condition4 = player.position.x <= platform.position.x + platform.width
+    //   // Sistema de colisiones para plataformas
+    //   if (condition1 && condition2 && condition3 && condition4) {
+    //     player.velocity.y = 0
+    //     keys.up.jump = 0
+    //   }
+    // })
+
+    if (keys.right.pressed && player.position.y <= canvas.height / 2) player.moveRight()
+    else if (keys.left.pressed && player.position.y >= canvas.height / 8) player.moveLeft()
     else {
-      player.velocity.x = 0
+      player.stop()
       if (keys.right.pressed) {
         scrollOffset += 5
         platforms.forEach(platform => { platform.moveToLeft() })
-        genericObjects.forEach(genericObject => { genericObject.moveToLeft() })
+        // genericObjects.forEach(genericObject => { genericObject.moveToLeft() })
       } else if (keys.left.pressed && scrollOffset > 0) {
         scrollOffset -= 5
         platforms.forEach(platform => { platform.moveToRight() })
-        genericObjects.forEach(genericObject => { genericObject.moveToRight() })
-      } else if (keys.left.pressed && scrollOffset === 0 && player.position.x > 0) {
-        player.moveToLeft()
+        // genericObjects.forEach(genericObject => { genericObject.moveToRight() })
+      } else if (keys.left.pressed && scrollOffset === 0 && player.position.y > 0) {
+        player.moveLeft()
       }
     }
 
-    platforms.forEach(platform => {
-    // Verificar que el jugador este por encima de la plataforma
-      const condition1 = player.position.y + player.height <= platform.position.y
-      // Permitir saltar cuando se esta por encima de la plataforma
-      const condition2 = player.position.y + player.height + player.velocity.y >= platform.position.y
-      // Permitir caer al jugador a la izquierda de la plataforma
-      const condition3 = player.position.x + player.width >= platform.position.x
-      // Permitir caer al jugador a la derecha de la plataforma
-      const condition4 = player.position.x <= platform.position.x + platform.width
-      // Sistema de colisiones para plataformas
-      if (condition1 && condition2 && condition3 && condition4) {
-        player.velocity.y = 0
-        keys.up.jump = 0
-      }
-    })
-
-    if (keys.up.pressed && keys.up.jump === 0 && player.velocity.y === 0) player.jump()
-
     // win condition
-    if (scrollOffset > 2_000) alert('Ganaste')
+    if (scrollOffset > 2_000) {
+      alert('Ganaste')
+      init()
+    }
     // lose condition
-    if (player.position.y > canvas.height) init()
+    if (player.position.x < 0) init()
   }
+
   init()
   animate()
+  controls({ c, canvas, keys, player })
 }
 
 main()
