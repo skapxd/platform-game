@@ -49,7 +49,7 @@ export const controls = ({ canvas, keys, c, player }: Controls) => {
     }
   })
 
-  canvas.addEventListener('touchend', (event) => {
+  canvas.addEventListener('touchend', () => {
     keys.right.pressed = false
     keys.left.pressed = false
   })
@@ -69,11 +69,11 @@ export const controls = ({ canvas, keys, c, player }: Controls) => {
   const up = document.querySelector('.up') as HTMLElement
   new TouchSweep(up, { value: 1 }, 20)
 
-  up?.addEventListener('swiperight', (e) => {
+  up?.addEventListener('swiperight', () => {
     player.jump()
   })
 
-  up?.addEventListener('tap', (e) => {
+  up?.addEventListener('tap', () => {
     player.jump()
   })
 }

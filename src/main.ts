@@ -1,10 +1,5 @@
 import '#/normalize.css'
 import { left, right } from './tutorial/controls'
-import platformPath from '#/src/img/platform.png'
-import platformSmallTallPath from '#/src/img/platformSmallTall.png'
-import hillsPath from '#/src/img/hills.png'
-import backgroundPath from '#/src/img/background.png'
-import { loadImage } from './utils/load-image'
 import { Platform } from './platform'
 import { Player } from './player'
 import { keys } from './keys'
@@ -21,13 +16,6 @@ async function main () {
 
   const c = canvas.getContext('2d')
   if (c == null) throw new Error('Canvas context not found')
-
-  const [platformImg, hillsImg, backgroundImg, platformSmallTallImg] = await Promise.all([
-    loadImage(platformPath),
-    loadImage(hillsPath),
-    loadImage(backgroundPath),
-    loadImage(platformSmallTallPath)
-  ])
 
   let platforms: Platform[]
   let genericObjects: GenericObject[]
