@@ -51,12 +51,10 @@ export const controls = ({ canvas, keys, c, player }: Controls) => {
   new TouchSweep(up, { value: 1 }, 20)
 
   up?.addEventListener('swiperight', (e) => {
-    console.log('abc')
     player.jump()
   })
 
   up?.addEventListener('tap', (e) => {
-    console.log('abc')
     player.jump()
   })
 }

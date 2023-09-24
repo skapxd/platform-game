@@ -9,6 +9,7 @@ import { Platform } from './platform'
 import { Player } from './player'
 import { keys } from './keys'
 import { controls } from './controls'
+import { drawDebugTools } from './utils/rules'
 
 async function main () {
   const canvas = document.querySelector('canvas')
@@ -27,16 +28,16 @@ async function main () {
     loadImage(platformSmallTallPath)
   ])
 
-  let platforms: Platform[] = []
-  let player: Player
-  let scrollOffset = 0
+  let platforms: Platform[]
+  const player = new Player()
+  let scrollOffset: number
 
   const init = () => {
-    player = new Player({ x: 0, y: 0 })
+    player.init()
     scrollOffset = 0
     platforms = [
       // new Platform({ image: platformSmallTallImg, position: { x: platformSmallTallImg.width * 1.5, y: canvas.height - platformSmallTallImg.height - 10 } })
-      new Platform({ image: platformImg, position: { x: -100, y: -100 } })
+      new Platform({ /* image: platformImg, */ position: { x: 100, y: 150 } })
       // new Platform({ image: platformImg, position: { x: platformImg.width - 3, y: canvas.height - platformImg.height + 20 } }),
       // new Platform({ image: platformImg, position: { x: platformImg.width * 2.5, y: canvas.height - platformImg.height + 20 } })
     ]
@@ -52,28 +53,37 @@ async function main () {
 
     requestAnimationFrame(animate)
     c.clearRect(0, 0, canvas.width, canvas.height)
-    platforms.forEach((platform) => { platform.draw(c) })
+    platforms.forEach((platform) => { platform.drawBlock(c) })
     left.draw(c)
     right.draw(c)
     player.update(c)
 
-    // platforms.forEach(platform => {
-    // // Verificar que el jugador este por encima de la plataforma
-    //   const condition1 = player.position.y + player.height <= platform.position.y
-    //   // Permitir saltar cuando se esta por encima de la plataforma
-    //   const condition2 = player.position.y + player.height + player.velocity.y >= platform.position.y
-    //   // Permitir caer al jugador a la izquierda de la plataforma
-    //   const condition3 = player.position.x + player.width >= platform.position.x
-    //   // Permitir caer al jugador a la derecha de la plataforma
-    //   const condition4 = player.position.x <= platform.position.x + platform.width
-    //   // Sistema de colisiones para plataformas
-    //   if (condition1 && condition2 && condition3 && condition4) {
-    //     player.velocity.y = 0
-    //     keys.up.jump = 0
-    //   }
-    // })
+    drawDebugTools(c, canvas)
 
-    if (keys.right.pressed && player.position.y <= canvas.height / 2) player.moveRight()
+    platforms.forEach(platform => {
+      // Verificar que el jugador este por encima de la plataforma
+      const condition1 = player.position.x >= platform.position.x + platform.height
+      // Permitir saltar cuando se esta por encima de la plataforma
+      const condition2 = player.position.x + player.velocity.x <= platform.position.x + platform.height
+      // Permitir caer al jugador a la izquierda de la plataforma
+      const condition3 = true ?? player.position.x + player.width >= platform.position.x
+      // Permitir caer al jugador a la derecha de la plataforma
+      const condition4 = true ?? player.position.x <= platform.position.x + platform.width
+      // Sistema de colisiones para plataformas
+      // console.log({ condition1, condition2, condition3, condition4 })
+      // console.log('condition1: ', player.position.x, platform.position.x + platform.height)
+      console.log('condition2: ', player.position.x, platform.position.x + platform.height)
+      if (condition1 && condition2 && condition3 && condition4) {
+        console.log('colision')
+        // player.stop()
+        player.velocity.x = 0
+
+        // keys.up.jump = 0
+      }
+    })
+
+    if (keys.up.pressed && keys.up.jump < 10) player.jump()
+    else if (keys.right.pressed && player.position.y <= canvas.height / 2) player.moveRight()
     else if (keys.left.pressed && player.position.y >= canvas.height / 8) player.moveLeft()
     else {
       player.stop()

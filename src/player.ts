@@ -9,8 +9,10 @@ export class Player {
   ) {}
 
   draw (c: CanvasRenderingContext2D) {
+    c.save()
     c.fillStyle = 'black'
     c.fillRect(this.position.x, this.position.y, this.width, this.height)
+    c.restore()
   }
 
   update (c: CanvasRenderingContext2D) {
@@ -37,5 +39,12 @@ export class Player {
 
   jump () {
     this.velocity.x = 15
+  }
+
+  init () {
+    this.position = {
+      x: 100,
+      y: 100
+    }
   }
 }
