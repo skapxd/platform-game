@@ -1,7 +1,7 @@
 import TouchSweep from 'touchsweep'
-import { type keys } from './keys'
-import { type Player } from './player'
-import { left, right } from './tutorial/controls'
+import { type keys } from '../game-1/keys'
+import { type Player } from '../game-1/player'
+import { left, right } from './arrow'
 
 interface Controls {
   canvas: HTMLCanvasElement

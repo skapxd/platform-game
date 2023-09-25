@@ -6,6 +6,7 @@
   <link rel="icon" type="image/svg+xml" href="/vite.svg" />
   <link rel="manifest" href="/manifest.json" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="/normalize.css">
   <title>Platform game</title>
   <style>
     * {
@@ -22,6 +23,8 @@
 
     canvas {
       touch-action: none;
+      outline: none;
+      border: none;
     }
 
     button {
@@ -51,10 +54,10 @@
 <body>
   <canvas></canvas>
 
-  <div class="up"></div>
-
+  
   <!-- <button>full screen</button> -->
-  <button onclick="location.reload()">R</button>
+  <!-- <div class="up"></div> -->
+  <!-- <button onclick="location.reload()">R</button> -->
 
   <script type="module" src="/src/main.ts"></script>
 
