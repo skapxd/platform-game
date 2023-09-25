@@ -1,5 +1,3 @@
-import { dpx } from '../utils/dpx'
-
 const gravity = (0.5)
 export class Player {
   public position = { x: (0), y: (0) }

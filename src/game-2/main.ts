@@ -1,4 +1,3 @@
-import { keys } from './keys'
 import { Player } from './player'
 
 export const main = () => {
