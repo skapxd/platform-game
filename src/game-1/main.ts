@@ -5,16 +5,20 @@ import { controls } from '../utils/controls'
 import { drawDebugTools } from '../utils/rules'
 import { GenericObject } from './generic-objects'
 import { left, right } from '../utils/arrow'
+import { setHD } from '../utils/hd'
 
 export const main = () => {
   const canvas = document.querySelector('canvas')
   if (canvas == null) throw new Error('Canvas not found')
-
   canvas.width = document.body.clientWidth
   canvas.height = document.body.clientHeight
 
+  setHD(canvas)
+
   const c = canvas.getContext('2d')
   if (c == null) throw new Error('Canvas context not found')
+
+  const rect = canvas.getBoundingClientRect()
 
   let platforms: Platform[]
   let genericObjects: GenericObject[]
@@ -35,8 +39,8 @@ export const main = () => {
       new Platform({ /* image: platformImg, */ position: { x: 50, y: 1400 } })
     ]
     genericObjects = [
-      new GenericObject({ color: 'rgba(255,0,0,0.5)', position: { x: 0, y: 0 }, width: canvas.height / 2, height: canvas.width / 2 }),
-      new GenericObject({ color: 'rgba(0,255,0,0.5)', position: { x: 0, y: canvas.width + 50 }, width: canvas.height / 2, height: canvas.width / 2 })
+      new GenericObject({ color: 'rgba(255,0,0,0.5)', position: { x: 0, y: 0 }, width: rect.height / 2, height: rect.width / 2 }),
+      new GenericObject({ color: 'rgba(0,255,0,0.5)', position: { x: 0, y: rect.width + 50 }, width: rect.height / 2, height: rect.width / 2 })
     ]
   }
 
@@ -45,7 +49,7 @@ export const main = () => {
     if (c == null) throw new Error('Canvas context not found')
 
     requestAnimationFrame(animate)
-    c.clearRect(0, 0, canvas.width, canvas.height)
+    c.clearRect(0, 0, rect.width, rect.height)
     genericObjects.forEach((genericObject) => { genericObject.drawBlock(c) })
 
     left.draw(c)
@@ -72,10 +76,9 @@ export const main = () => {
       }
     })
 
-    player.velocity.x = 0
     if (keys.up.pressed && keys.up.jump < 1) player.jump()
-    else if (keys.right.pressed && player.position.y <= canvas.height / 2) player.moveRight()
-    else if (keys.left.pressed && player.position.y >= canvas.height / 3) player.moveLeft()
+    else if (keys.right.pressed && player.position.y <= rect.height / 2) player.moveRight()
+    else if (keys.left.pressed && player.position.y >= rect.height / 3) player.moveLeft()
     else {
       player.stop()
       if (keys.right.pressed) {

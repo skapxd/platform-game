@@ -1,3 +1,3 @@
-import { main } from './game-2/main'
+import { main } from './game-1/main'
 
 main()
